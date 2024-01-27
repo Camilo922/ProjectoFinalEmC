@@ -1,0 +1,1014 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+#include<string.h>
+
+typedef struct Data{
+	int dia;
+	char mes[15];
+	int ano;
+} Data;
+
+typedef struct Pessoa{
+	int TipoDeConta;
+	int NumeroDeOrdem;
+	int Codigo;
+	char Nome[45];
+	char genero[15];
+	char NumeroDeBilhete[15];
+	int Telefone;
+	Data Nascimento;
+	int VerificaConta;
+} Pessoa;
+
+typedef struct Conta{
+	int Codigo;
+	int NumeroDaConta;
+	float Saldo;
+	int TipoDeConta;
+}Conta;
+
+int i,j,n,z;
+float l;
+char q[45];
+int ClientesCadastrado=0,ContaAberta=0,p;
+Pessoa Cliente[10];
+Conta DonoConta[10];
+FILE *backup;
+
+bool CadastrarClientes(Pessoa k ){
+	Cliente[ClientesCadastrado].TipoDeConta = k.TipoDeConta;
+	Cliente[ClientesCadastrado].VerificaConta = 0;
+	Cliente[ClientesCadastrado].NumeroDeOrdem = ClientesCadastrado+1;
+	Cliente[ClientesCadastrado].Codigo = 3*ClientesCadastrado+11001;
+	strcpy(Cliente[ClientesCadastrado].Nome,k.Nome);
+	strcpy(Cliente[ClientesCadastrado].NumeroDeBilhete,k. NumeroDeBilhete);
+	Cliente[ClientesCadastrado].Telefone = k.Telefone;
+	strcpy(Cliente[ClientesCadastrado].genero,k.genero);
+	Cliente[ClientesCadastrado].Nascimento.dia = k.Nascimento.dia;
+	strcpy(Cliente[ClientesCadastrado].Nascimento.mes, k.Nascimento.mes);
+	Cliente[ClientesCadastrado].Nascimento.ano = k.Nascimento.ano;
+	ClientesCadastrado = ClientesCadastrado+1;
+	return true;
+}
+
+bool AberturaDeConta( Pessoa k, int TipoDeConta){
+	DonoConta[ContaAberta].TipoDeConta = TipoDeConta;
+	DonoConta[ContaAberta].Codigo = k.Codigo;
+	DonoConta[ContaAberta].NumeroDaConta = 10000000+DonoConta[ContaAberta].Codigo;
+	DonoConta[ContaAberta].Saldo = 0;
+	ContaAberta = ContaAberta+1;
+	return true;
+}
+
+bool DepositarDinheiro( int NumeroDaConta, float valor){
+	for( i=0;i<=ContaAberta-1;i++){
+		if(NumeroDaConta==DonoConta[i].NumeroDaConta){
+			DonoConta[i].Saldo = DonoConta[i].Saldo+valor;
+		}
+	}
+	return true;
+}
+
+bool LevantarDinheiro( int NumeroDaConta, float valor){
+	for( i=0;i<=ContaAberta-1;i++){
+		if(NumeroDaConta==DonoConta[i].NumeroDaConta){
+			if(valor <= DonoConta[i].Saldo){
+				DonoConta[i].Saldo = DonoConta[i].Saldo-valor;
+			}
+		}
+	}
+	return true;
+}
+
+float ConsultarSaldo( int NumeroDaConta){
+	for(i=0;i<=ContaAberta-1;i++){
+		if(NumeroDaConta==DonoConta[i].NumeroDaConta){
+			l = DonoConta[i].Saldo;
+		}
+	}
+	return l;
+}
+
+bool TransferirDinheiro( int NumeroDaContaEnviar,int NumeroDaContaReceber,float valor){
+	for( i=0;i<=ContaAberta-1;i++){
+		if(NumeroDaContaEnviar==DonoConta[i].NumeroDaConta){
+			for( j=0;j<=ContaAberta-1;j++){
+				if(NumeroDaContaReceber==DonoConta[j].NumeroDaConta){
+					if(valor <= DonoConta[i].Saldo){
+					 DonoConta[i].Saldo = DonoConta[i].Saldo-valor;
+					 DonoConta[j].Saldo = DonoConta[j].Saldo+valor;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool AtualizarClientes(Pessoa k, int Codigo){
+	for(i=0;i<=ClientesCadastrado-1;i++){
+			if(Codigo==Cliente[i].Codigo){
+				strcpy(Cliente[i].Nome,k.Nome);
+				strcpy(Cliente[i].NumeroDeBilhete,k.NumeroDeBilhete);
+				Cliente[i].Telefone = k.Telefone;
+				strcpy(Cliente[i].genero,k.genero);
+				Cliente[i].Nascimento.dia = k.Nascimento.dia;
+				strcpy(Cliente[i].Nascimento.mes, k.Nascimento.mes);
+				Cliente[i].Nascimento.ano = k.Nascimento.ano;
+			}
+	}
+	return true;
+}
+
+void ListarClientes(){
+	for(i=0;i<=ClientesCadastrado-1;i++){
+			printf("==========================================\n");
+			printf("N� de ordem: %i\n",Cliente[i].NumeroDeOrdem);
+			printf("Tipo de conta: %i\n",Cliente[i].TipoDeConta);
+			printf("Codigo de identificacao: %i\n",Cliente[i].Codigo);
+			printf("Nome: %s\n",Cliente[i].Nome);
+			printf("Genero: %s\n",Cliente[i].genero);
+			printf("Numero do bilhete de identidade: %s\n",Cliente[i].NumeroDeBilhete);
+			printf("Numero de telefone: %i\n",Cliente[i].Telefone);
+			printf("Data de nascimento: %i  ",Cliente[i].Nascimento.dia);
+			printf("de %s ",Cliente[i].Nascimento.mes);
+			printf(" de %i ",Cliente[i].Nascimento.ano);
+			printf("\n==============================================\n");
+	}
+}
+
+void CopiaDeSeguranca(){
+	backup=fopen("UchihaItachi.txt","w+");
+	for(i=0;i<=ClientesCadastrado-1;i++){
+		fprintf(backup,"%s-%s-%s-%i-%i-%s-%i\n",Cliente[i].Nome,Cliente[i].genero,Cliente[i].NumeroDeBilhete,Cliente[i].Telefone,Cliente[i].Nascimento.dia,Cliente[i].Nascimento.mes,Cliente[i].Nascimento.ano);
+	}
+	fclose(backup);
+}
+
+void MeusDados(Pessoa k){
+	for(i=0;i<=ClientesCadastrado-1;i++){
+		if(k.Codigo==Cliente[i].Codigo){
+			printf("==========================================\n");
+			printf("N� de ordem: %i\n",Cliente[i].NumeroDeOrdem);
+			printf("Tipo de conta: %i\n",Cliente[i].TipoDeConta);
+			printf("Codigo de identificacao: %i\n",Cliente[i].Codigo);
+			printf("Nome: %s\n",Cliente[i].Nome);
+			printf("Genero: %s\n",Cliente[i].genero);
+			printf("Numero do bilhete de identidade: %s\n",Cliente[i].NumeroDeBilhete);
+			printf("Numero de telefone: %i\n",Cliente[i].Telefone);
+			printf("Data de nascimento: %i  ",Cliente[i].Nascimento.dia);
+			printf(" de %s",Cliente[i].Nascimento.mes);
+			printf(" de %i ",Cliente[i].Nascimento.ano);
+			printf("\n==============================================\n");
+        }
+    }
+    for(i=0;i<=ContaAberta-1;i++){
+		if(k.Codigo==DonoConta[i].Codigo){
+			printf("Tipo de conta: %d\n",DonoConta[i].TipoDeConta);
+			printf("Codigo da conta: %d\n",DonoConta[i].Codigo);
+			printf("Numero da conta: %d\n",DonoConta[i].NumeroDaConta);
+			printf("Saldo da conta: %f\n",DonoConta[i].Saldo);
+			printf("===========================================\n");
+			printf("Estes sao os seus dados !\n\n");
+		}
+	}
+	}
+
+int main(){
+	float valor,k;
+	int opcao,tipodeconta,Codigo,NumeroDaConta,NumeroDaConta2;
+	char quero='S';
+    Pessoa t;
+	while(quero=='s' || quero=='S'){
+		printf("==================MENU======================\n");
+		printf("[01] Cadastrar cliente \n");
+		printf("[02] Abertura de conta \n");
+		printf("[03] Depositar dinheiro \n");
+		printf("[04] Levantar dinheiro \n");
+		printf("[05] Consultar saldo \n");
+		printf("[06] Transferir dinheiro \n");
+		printf("[07] Atualizar dados do cliente \n");
+		printf("[08] Listar clientes \n");
+		printf("[09] Copia de seguran�a\n");
+		printf("[10] Restaurar copia de seguran�a \n");
+		printf("[11] Dados do cliente \n");
+		printf("[12] Terminar \n");
+		scanf("%i%*c",&opcao);
+		switch(opcao){
+			case 1:
+				system("cls");
+				quero='s';
+				while(quero=='s' || quero=='S'){
+					printf("[0] Cliente particular \n");
+					printf("[1] Cliente empresarial \n");
+					printf("[2] Sair \n");
+					scanf("%i%*c",&t.TipoDeConta);
+					switch(t.TipoDeConta){
+						case 0:
+						case 1:
+                            while(quero=='s' || quero=='S'){
+                                    system("cls");
+									printf("==========================Cadastro==========================\n\n");
+                                    printf("Insira o nome: ");
+                                    scanf ("%[^\n]%*c",t.Nome);
+                                    system("cls");
+                                    quero='s';
+                                    if(t.TipoDeConta==0){
+                                    	while(quero=='s' || quero=='S'){
+                                        printf("Escolha o genero: \n");
+                                        printf(" [1] Masculino \n");
+                                        printf(" [2] Feminino \n");
+                                    	scanf("%i%*c",&opcao);
+                                        switch(opcao){
+                                          case 1:
+                                            strcpy(t.genero,"Masculino");
+                                            quero='n';
+                                            break;
+                                          case 2:
+                                            strcpy(t.genero,"Feminino");
+                                            quero='n';
+                                            break;
+                                          default:
+                                            system("cls");
+                                            printf("Essa possibilidade n�o existe !\n\n");
+                                            quero='s';
+                                            break;
+                                        }
+                                    }
+									}else{
+										strcpy(t.genero," ");
+									}
+                                    system("cls");
+                                    printf("Insira o numero do bilhete de identidade ou o NIF: \n");
+                                    scanf ("%[^\n]%*c",t.NumeroDeBilhete);
+                                    system("cls");
+                                    quero='s';
+                                    while(quero=='s' || quero=='S'){
+                                        printf("Insira o n�mero de telefone: \n");
+                                        scanf("%i%*c",&t.Telefone);
+                                        if(t.Telefone <= 999999999 && t.Telefone >= 900000000){
+                                            t.Telefone=t.Telefone;
+                                            quero='n';
+                                        }else{
+                                            system("cls");
+                                            printf("O n�mero de telefone inserido n�o existe !\n\n");
+                                            quero='s';
+                                        }
+                                    }
+                                    system("cls");
+                                    quero='s';
+                                    while(quero=='s' || quero=='S'){
+                                        printf("Insira o dia de nascimento: ");
+                                        scanf("%i%*c",&t.Nascimento.dia);
+                                        system("cls");
+                                        if(t.Nascimento.dia >=01 && t.Nascimento.dia <=31){
+                                            if(t.Nascimento.dia >=01 && t.Nascimento.dia <=29){
+                                                t.Nascimento.dia = t.Nascimento.dia;
+                                                while(quero=='s' || quero=='S'){
+                                                    printf("Dia: ",t.Nascimento.dia,"\n");
+                                                    printf("Escolha o mes:\n");
+                                                    printf(" [01] Janeiro\n");
+                                                    printf(" [02] Fevereiro\n");
+                                                    printf(" [03] Mar�o\n");
+                                                    printf(" [04] Abril\n");
+                                                    printf(" [05] Maio\n");
+                                                    printf(" [06] Junho\n");
+                                                    printf(" [07] Julho\n");
+                                                    printf(" [08] Agosto\n");
+                                                    printf(" [09] Setembro\n");
+                                                    printf(" [10] Outubro\n");
+                                                    printf(" [11] Novembro\n");
+                                                    printf(" [12] Dezembro\n");
+                                                    scanf("%i%*c",&opcao);
+                                                    switch(opcao){
+                                                        case 1:
+                                                          strcpy(t.Nascimento.mes,"Janeiro");
+												          quero ='N';
+												          break;
+                                                        case 2:
+                                                          strcpy(t.Nascimento.mes,"Fevereiro");
+												          quero ='N';
+												          break;
+                                                        case 3:
+                                                         strcpy(t.Nascimento.mes,"Mar�o");
+												          quero ='N';
+												          break;
+                                                        case 4:
+                                                          strcpy(t.Nascimento.mes,"Abril");
+												          quero ='N';
+												          break;
+                                                        case 5:
+                                                          strcpy(t.Nascimento.mes,"Maio");
+												          quero ='N';
+												          break;
+                                                        case 6:
+                                                          strcpy(t.Nascimento.mes,"Junho");
+												          quero ='N';
+												          break;
+                                                        case 7:
+                                                          strcpy(t.Nascimento.mes,"Julho");
+												          quero ='N';
+												          break;
+                                                        case 8:
+                                                          strcpy(t.Nascimento.mes,"Agosto");
+												          quero ='N';
+												          break;
+                                                        case 9:
+                                                          strcpy(t.Nascimento.mes,"Setembro");
+                                                          quero ='N';
+                                                          break;
+                                                        case 10:
+                                                          strcpy(t.Nascimento.mes,"Outubro");
+												          quero ='N';
+												          break;
+                                                        case 11:
+                                                          strcpy(t.Nascimento.mes,"Novembro");
+												          quero ='N';
+												          break;
+                                                        case 12:
+                                                          strcpy(t.Nascimento.mes,"Dezembro");
+												          quero ='N';
+												          break;
+                                                        default:
+                                                          system("cls");
+                                                          printf("Essa possibilidade nao existe\n\n");
+                                                          quero ='S';
+                                                          break;
+                                                    }
+                                                }
+                                        }
+                                            if(t.Nascimento.dia==30){
+                                                t.Nascimento.dia = t.Nascimento.dia;
+                                                while(quero=='s' || quero=='S'){
+                                                    printf("Dia: ",t.Nascimento.dia,"\n");
+                                                    printf("Escolha o seu mes:\n");
+                                                    printf(" [01] Janeiro\n");
+                                                    printf(" [03] Mar�o\n");
+                                                    printf(" [04] Abril\n");
+                                                    printf(" [05] Maio\n");
+                                                    printf(" [06] Junho\n");
+                                                    printf(" [07] Julho\n");
+                                                    printf(" [08] Agosto\n");
+                                                    printf(" [09] Setembro\n");
+                                                    printf(" [10] Outubro\n");
+                                                    printf(" [11] Novembro\n");
+                                                    printf(" [12] Dezembro\n");
+                                                    scanf("%i%*c",&opcao);
+                                                    switch(opcao){
+                                                        case 1:
+                                                          strcpy(t.Nascimento.mes,"Janeiro");
+												          quero ='N';
+												          break;
+                                                        case 3:
+                                                          strcpy(t.Nascimento.mes,"Mar�o");
+												          quero ='N';
+												          break;
+                                                        case 4:
+                                                          strcpy(t.Nascimento.mes,"Abril");
+												          quero ='N';
+												          break;
+                                                        case 5:
+                                                          strcpy(t.Nascimento.mes,"Maio");
+												          quero ='N';
+												          break;
+                                                        case 6:
+                                                          strcpy(t.Nascimento.mes,"Junho");
+												          quero ='N';
+												          break;
+                                                        case 7:
+                                                          strcpy(t.Nascimento.mes,"Julho");
+												          quero ='N';
+												          break;
+                                                        case 8:
+                                                          strcpy(t.Nascimento.mes,"Agosto");
+												          quero ='N';
+												          break;
+                                                        case 9:
+                                                          strcpy(t.Nascimento.mes,"Setembro");
+                                                          quero ='N';
+                                                          break;
+                                                        case 10:
+                                                          strcpy(t.Nascimento.mes,"Outubro");
+												          quero ='N';
+												          break;
+                                                        case 11:
+                                                          strcpy(t.Nascimento.mes,"Novembro");
+												          quero ='N';
+												          break;
+                                                        case 12:
+                                                          strcpy(t.Nascimento.mes,"Dezembro");
+												          quero ='N';
+												          break;
+                                                        default:
+                                                          system("cls");
+                                                          printf("Essa possibilidade nao existe\n\n");
+                                                          quero ='S';
+                                                          break;
+                                                    }
+                                                }
+                                            }
+                                            if(t.Nascimento.dia==31){
+                                                t.Nascimento.dia = t.Nascimento.dia;
+                                                while(quero=='s' || quero=='S'){
+                                                    printf("Dia: ",t.Nascimento.dia,"\n");
+                                                    printf("Escolha o seu mes:\n");
+                                                    printf(" [01] Janeiro\n");
+                                                    printf(" [03] Mar�o\n");
+                                                    printf(" [05] Maio\n");
+                                                    printf(" [07] Julho\n");
+                                                    printf(" [08] Agosto\n");;
+                                                    printf(" [10] Outubro\n");
+                                                    printf(" [12] Dezembro\n");
+                                                    scanf("%i%*c",&opcao);
+                                                    switch(opcao){
+                                                        case 1:
+                                                          strcpy(t.Nascimento.mes,"Janeiro");
+												          quero ='N';
+												          break;
+                                                        case 3:
+                                                          strcpy(t.Nascimento.mes,"Mar�o");
+												          quero ='N';
+												          break;
+                                                        case 5:
+                                                          strcpy(t.Nascimento.mes,"Maio");
+												          quero ='N';
+												          break;
+                                                        case 7:
+                                                          strcpy(t.Nascimento.mes,"Julho");
+												          quero ='N';
+												          break;
+                                                        case 8:
+                                                          strcpy(t.Nascimento.mes,"Agosto");
+												          quero ='N';
+												          break;
+                                                        case 10:
+                                                          strcpy(t.Nascimento.mes,"Outubro");
+												          quero ='N';
+												          break;
+                                                        case 12:
+                                                          strcpy(t.Nascimento.mes,"Dezembro");
+												          quero ='N';
+												          break;
+                                                        default:
+                                                          system("cls");
+                                                          printf("Essa possibilidade nao existe\n\n");
+                                                          quero ='S';
+                                                          break;
+                                                    }
+                                                }
+                                            }
+                                        }else{
+                                            printf("Esse dia n�o existe\n\n");
+                                            quero='s';
+                                        }
+                                    }
+                                    system("cls");
+                                    quero='s';
+                                    while(quero=='s' || quero=='S'){
+                                        printf("Dia: %d \n",t.Nascimento.dia);
+                                        printf("M�s: %s \n",t.Nascimento.mes);
+                                        printf("Insira o ano de nascimento: ");
+                                        scanf("%i%*c",&t.Nascimento.ano);
+                                        system("cls");
+                                        if(t.Nascimento.ano >=1900 && t.Nascimento.ano <=2024){
+                                            t.Nascimento.ano = t.Nascimento.ano;
+										    quero ='N';
+                                        }else{
+                                            quero ='S';
+										    printf("N�o e possivel registar este ano\n\n");
+                                        }
+                                    }
+                            CadastrarClientes(t);
+                            printf("Deseja cadastrar mais clientes ?! [S|N]\n");
+                            scanf("%c%*c",&quero);
+                            }
+                            quero='s';
+                            system("cls");
+                            break;
+						default:
+							system("cls");
+							quero='n';
+							break;
+					}
+				}
+				system("cls");
+				quero='s';
+				break;
+			case 2:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Criar conta ==========================\n\n");
+							system("cls");
+							printf("insira o codigo do cliente :");
+							scanf("%i%*c",&Codigo);
+							for(n=0;n<=ClientesCadastrado-1;n++){
+								if(Codigo==Cliente[n].Codigo){
+									printf("==========================================\n");
+									printf("N� de ordem: %i\n",Cliente[n].NumeroDeOrdem);
+									printf("Tipo de conta: %i\n",Cliente[n].TipoDeConta);
+									printf("Codigo de identificacao: %i\n",Cliente[n].Codigo);
+									printf("Nome: %s\n",Cliente[n].Nome);
+									printf("Genero: %s\n",Cliente[n].genero);
+									printf("Numero do bilhete de identidade: %s\n",Cliente[n].NumeroDeBilhete);
+									printf("Numero de telefone: %i\n",Cliente[n].Telefone);
+									printf("Data de nascimento: %i  ",Cliente[n].Nascimento.dia);
+									printf("de %s ",Cliente[n].Nascimento.mes);
+									printf(" de %i ",Cliente[n].Nascimento.ano);
+									printf("\n==============================================\n");
+									if(Cliente[n].VerificaConta == 0){ 
+										tipodeconta=Cliente[n].TipoDeConta;
+										AberturaDeConta(Cliente[n], tipodeconta);
+										Cliente[n].VerificaConta=1;
+										for(n=0;n<=ContaAberta-1;n++){
+											if(Codigo==DonoConta[n].Codigo){
+												printf("Tipo de conta: %d\n",DonoConta[n].TipoDeConta);
+												printf("Codigo da conta: %d\n",DonoConta[n].Codigo);
+												printf("Numero da conta: %d\n",DonoConta[n].NumeroDaConta);
+												printf("Saldo da conta: %f\n",DonoConta[n].Saldo);
+												printf("===========================================\n");
+												printf("Conta criada com sucesso !\n\n");
+											}
+										}
+									}else{
+										printf("\nEste cliente ja possui uma conta !\n\n");
+									}
+								}
+									
+					}		
+					printf("Deseja abrir mais contas ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 3:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Deposito ==========================\n\n");
+					printf("Insira o numero da Conta: ");
+					scanf("%i%*c",&NumeroDaConta);
+					for(n=0;n<=ContaAberta-1;n++){
+						if(NumeroDaConta==DonoConta[n].NumeroDaConta){
+							printf("Insira o valor a depositar: ");
+							scanf("%f%*c",&valor);
+							DepositarDinheiro(NumeroDaConta,valor);
+						}
+					}
+					printf("Deseja depositar mais dinheiro ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 4:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Levantamento ==========================\n\n");
+					printf("Insira o numero da Conta: ");
+					scanf("%i%*c",&NumeroDaConta);
+					for(n=0;n<=ContaAberta-1;n++){
+						if(NumeroDaConta==DonoConta[n].NumeroDaConta){
+							printf("Insira o valor a levantar: ");
+							scanf("%f%*c",&valor);
+							LevantarDinheiro(NumeroDaConta,valor);
+						}
+					}
+                	printf("Deseja levantar mais dinheiro ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 5:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Consulta ==========================\n\n");
+					printf("Insira o numero da Conta: ");
+					scanf("%i%*c",&NumeroDaConta);
+					for(n=0;n<=ContaAberta-1;n++){
+						if(NumeroDaConta==DonoConta[n].NumeroDaConta){
+							printf("Saldo da conta: ");
+							k=ConsultarSaldo (DonoConta[n].NumeroDaConta);
+							printf(" %f\n",k);
+							k=0;
+						}
+					}
+                	printf("Deseja consultar mais saldo ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 6:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Transferencia ==========================\n\n");
+					printf("Insira o numero da sua Conta: ");
+					scanf("%i%*c", &NumeroDaConta);
+					for(n=0;n<=ContaAberta-1;n++){
+						if(NumeroDaConta==DonoConta[n].NumeroDaConta){
+							printf("Insira o numero da conta que pretende enviar :");
+							scanf("%i%*c",&NumeroDaConta2);
+							for(z=0;z<=ContaAberta-1;z++){
+								if(NumeroDaConta2 == DonoConta[z].NumeroDaConta){
+									printf("Insira o valor a enviar: ");
+									scanf("%f%*c",&valor);
+									TransferirDinheiro(NumeroDaConta,NumeroDaConta2,valor);
+								}
+							}
+						}
+					}
+
+
+                	printf("Deseja transferir mais dinheiro ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 7:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Atualizar dados ==========================\n\n");
+					printf("Digite o codigo do cliente:\n");
+					scanf("%i%*c",&Codigo);
+					for(n=0;n<=ClientesCadastrado-1;n++){
+						if(Codigo==Cliente[n].Codigo){
+							printf("==========================================\n");
+							printf("N� de ordem: %i\n",Cliente[n].NumeroDeOrdem);
+							printf("Tipo de conta: %i\n",Cliente[n].TipoDeConta);
+							printf("Codigo de identificacao: %i\n",Cliente[n].Codigo);
+							printf("Nome: %s\n",Cliente[n].Nome);
+							printf("Genero: %s\n",Cliente[n].genero);
+							printf("Numero do bilhete de identidade: %s\n",Cliente[n].NumeroDeBilhete);
+							printf("Numero de telefone: %i\n",Cliente[n].Telefone);
+							printf("Data de nascimento: %i  ",Cliente[n].Nascimento.dia);
+							printf(" de %s",Cliente[n].Nascimento.mes);
+							printf(" de %i ",Cliente[n].Nascimento.ano);
+							printf("\n==============================================\n");
+							printf("O que deseja atualizar:\n");
+									printf(" [1] Nome: \n");
+									printf(" [2] Genero: \n");
+									printf(" [3] Numero do bilhete de identidade: \n");
+									printf(" [4] Numero de telefone: \n");
+									printf(" [5] Data de nascimento: \n");
+									scanf("%i%*c",&opcao);
+									switch(opcao){
+										case 1:
+											strcpy(q,Cliente[n].Nome);
+											printf("Nome antigo: %s\n",q);
+											printf("Escreva o novo nome: ");
+											scanf ("%[^\n]%*c",t.Nome);
+											break;
+										case 2:
+											quero='s';
+		                                    if(Cliente[n].TipoDeConta==0){
+		                                    	while(quero=='s' || quero=='S'){
+		                                        printf("Escolha o genero: \n");
+		                                        printf(" [1] Masculino \n");
+		                                        printf(" [2] Feminino \n");
+		                                    	scanf("%i%*c",&opcao);
+		                                        switch(opcao){
+		                                          case 1:
+		                                            strcpy(t.genero,"Masculino");
+		                                            quero='n';
+		                                            break;
+		                                          case 2:
+		                                            strcpy(t.genero,"Feminino");
+		                                            quero='n';
+		                                            break;
+		                                          default:
+		                                            system("cls");
+		                                            printf("Essa possibilidade n�o existe !\n\n");
+		                                            quero='s';
+		                                            break;
+		                                        }
+		                                    }
+											}else{
+												strcpy(t.genero," ");
+											}
+											break;
+										case 3:
+											strcpy(q,Cliente[n].NumeroDeBilhete);
+											printf("Numero do bilhete antigo: %s\n",q);
+											printf("Escreva o novo numero de bilhete: ");
+											scanf ("%[^\n]%*c",t.NumeroDeBilhete);
+											break;
+										case 4:
+											system("cls");
+											p = Cliente[n].Telefone;
+                                    		quero='s';
+		                                    while(quero=='s' || quero=='S'){
+												printf("Antigo numero de telefone: %i\n",p);
+												printf("Insira o novo n�mero de telefone : ");
+		                                        scanf("%i%*c",&t.Telefone);
+		                                        if(t.Telefone <= 999999999 && t.Telefone >= 900000000){
+		                                            t.Telefone=t.Telefone;
+		                                            quero='n';
+		                                        }else{
+		                                            system("cls");
+		                                            printf("O n�mero de telefone inserido n�o existe !\n\n");
+		                                            quero='s';
+		                                        }
+		                                    }
+											break;
+										case 5:
+		                                    system("cls");
+		                                    quero='s';
+		                                    while(quero=='s' || quero=='S'){
+		                                        printf("Insira o seu dia de nascimento: ");
+		                                        scanf("%i%*c",&t.Nascimento.dia);
+		                                        system("cls");
+		                                        if(t.Nascimento.dia >=01 && t.Nascimento.dia <=31){
+		                                            if(t.Nascimento.dia >=01 && t.Nascimento.dia <=29){
+		                                                t.Nascimento.dia = t.Nascimento.dia;
+		                                                while(quero=='s' || quero=='S'){
+		                                                    printf("Dia: ",t.Nascimento.dia,"\n");
+		                                                    printf("Escolha o seu mes:\n");
+		                                                    printf(" [01] Janeiro\n");
+		                                                    printf(" [02] Fevereiro\n");
+		                                                    printf(" [03] Mar�o\n");
+		                                                    printf(" [04] Abril\n");
+		                                                    printf(" [05] Maio\n");
+		                                                    printf(" [06] Junho\n");
+		                                                    printf(" [07] Julho\n");
+		                                                    printf(" [08] Agosto\n");
+		                                                    printf(" [09] Setembro\n");
+		                                                    printf(" [10] Outubro\n");
+		                                                    printf(" [11] Novembro\n");
+		                                                    printf(" [12] Dezembro\n");
+		                                                    scanf("%i%*c",&opcao);
+		                                                    switch(opcao){
+		                                                        case 1:
+		                                                          strcpy(t.Nascimento.mes,"Janeiro");
+														          quero ='N';
+														          break;
+		                                                        case 2:
+		                                                          strcpy(t.Nascimento.mes,"Fevereiro");
+														          quero ='N';
+														          break;
+		                                                        case 3:
+		                                                         strcpy(t.Nascimento.mes,"Mar�o");
+														          quero ='N';
+														          break;
+		                                                        case 4:
+		                                                          strcpy(t.Nascimento.mes,"Abril");
+														          quero ='N';
+														          break;
+		                                                        case 5:
+		                                                          strcpy(t.Nascimento.mes,"Maio");
+														          quero ='N';
+														          break;
+		                                                        case 6:
+		                                                          strcpy(t.Nascimento.mes,"Junho");
+														          quero ='N';
+														          break;
+		                                                        case 7:
+		                                                          strcpy(t.Nascimento.mes,"Julho");
+														          quero ='N';
+														          break;
+		                                                        case 8:
+		                                                          strcpy(t.Nascimento.mes,"Agosto");
+														          quero ='N';
+														          break;
+		                                                        case 9:
+		                                                          strcpy(t.Nascimento.mes,"Setembro");
+		                                                          quero ='N';
+		                                                          break;
+		                                                        case 10:
+		                                                          strcpy(t.Nascimento.mes,"Outubro");
+														          quero ='N';
+														          break;
+		                                                        case 11:
+		                                                          strcpy(t.Nascimento.mes,"Novembro");
+														          quero ='N';
+														          break;
+		                                                        case 12:
+		                                                          strcpy(t.Nascimento.mes,"Dezembro");
+														          quero ='N';
+														          break;
+		                                                        default:
+		                                                          system("cls");
+		                                                          printf("Essa possibilidade nao existe\n\n");
+		                                                          quero ='S';
+		                                                          break;
+		                                                    }
+		                                                }
+		                                        }
+		                                            if(t.Nascimento.dia==30){
+		                                                t.Nascimento.dia = t.Nascimento.dia;
+		                                                while(quero=='s' || quero=='S'){
+		                                                    printf("Dia: ",t.Nascimento.dia,"\n");
+		                                                    printf("Escolha o seu mes:\n");
+		                                                    printf(" [01] Janeiro\n");
+		                                                    printf(" [03] Mar�o\n");
+		                                                    printf(" [04] Abril\n");
+		                                                    printf(" [05] Maio\n");
+		                                                    printf(" [06] Junho\n");
+		                                                    printf(" [07] Julho\n");
+		                                                    printf(" [08] Agosto\n");
+		                                                    printf(" [09] Setembro\n");
+		                                                    printf(" [10] Outubro\n");
+		                                                    printf(" [11] Novembro\n");
+		                                                    printf(" [12] Dezembro\n");
+		                                                    scanf("%i%*c",&opcao);
+		                                                    switch(opcao){
+		                                                        case 1:
+		                                                          strcpy(t.Nascimento.mes,"Janeiro");
+														          quero ='N';
+														          break;
+		                                                        case 3:
+		                                                          strcpy(t.Nascimento.mes,"Mar�o");
+														          quero ='N';
+														          break;
+		                                                        case 4:
+		                                                          strcpy(t.Nascimento.mes,"Abril");
+														          quero ='N';
+														          break;
+		                                                        case 5:
+		                                                          strcpy(t.Nascimento.mes,"Maio");
+														          quero ='N';
+														          break;
+		                                                        case 6:
+		                                                          strcpy(t.Nascimento.mes,"Junho");
+														          quero ='N';
+														          break;
+		                                                        case 7:
+		                                                          strcpy(t.Nascimento.mes,"Julho");
+														          quero ='N';
+														          break;
+		                                                        case 8:
+		                                                          strcpy(t.Nascimento.mes,"Agosto");
+														          quero ='N';
+														          break;
+		                                                        case 9:
+		                                                          strcpy(t.Nascimento.mes,"Setembro");
+		                                                          quero ='N';
+		                                                          break;
+		                                                        case 10:
+		                                                          strcpy(t.Nascimento.mes,"Outubro");
+														          quero ='N';
+														          break;
+		                                                        case 11:
+		                                                          strcpy(t.Nascimento.mes,"Novembro");
+														          quero ='N';
+														          break;
+		                                                        case 12:
+		                                                          strcpy(t.Nascimento.mes,"Dezembro");
+														          quero ='N';
+														          break;
+		                                                        default:
+		                                                          system("cls");
+		                                                          printf("Essa possibilidade nao existe\n\n");
+		                                                          quero ='S';
+		                                                          break;
+		                                                    }
+		                                                }
+		                                            }
+		                                            if(t.Nascimento.dia==31){
+		                                                t.Nascimento.dia = t.Nascimento.dia;
+		                                                while(quero=='s' || quero=='S'){
+		                                                    printf("Dia: ",t.Nascimento.dia,"\n");
+		                                                    printf("Escolha o seu mes:\n");
+		                                                    printf(" [01] Janeiro\n");
+		                                                    printf(" [03] Mar�o\n");
+		                                                    printf(" [05] Maio\n");
+		                                                    printf(" [07] Julho\n");
+		                                                    printf(" [08] Agosto\n");;
+		                                                    printf(" [10] Outubro\n");
+		                                                    printf(" [12] Dezembro\n");
+		                                                    scanf("%i%*c",&opcao);
+		                                                    switch(opcao){
+		                                                        case 1:
+		                                                          strcpy(t.Nascimento.mes,"Janeiro");
+														          quero ='N';
+														          break;
+		                                                        case 3:
+		                                                          strcpy(t.Nascimento.mes,"Mar�o");
+														          quero ='N';
+														          break;
+		                                                        case 5:
+		                                                          strcpy(t.Nascimento.mes,"Maio");
+														          quero ='N';
+														          break;
+		                                                        case 7:
+		                                                          strcpy(t.Nascimento.mes,"Julho");
+														          quero ='N';
+														          break;
+		                                                        case 8:
+		                                                          strcpy(t.Nascimento.mes,"Agosto");
+														          quero ='N';
+														          break;
+		                                                        case 10:
+		                                                          strcpy(t.Nascimento.mes,"Outubro");
+														          quero ='N';
+														          break;
+		                                                        case 12:
+		                                                          strcpy(t.Nascimento.mes,"Dezembro");
+														          quero ='N';
+														          break;
+		                                                        default:
+		                                                          system("cls");
+		                                                          printf("Essa possibilidade nao existe\n\n");
+		                                                          quero ='S';
+		                                                          break;
+		                                                    }
+		                                                }
+		                                            }
+		                                        }else{
+		                                            printf("Esse dia n�o existe\n\n");
+		                                            quero='s';
+		                                        }
+		                                    }
+		                                    system("cls");
+		                                    quero='s';
+		                                    while(quero=='s' || quero=='S'){
+		                                        printf("Dia: %d \n",t.Nascimento.dia);
+		                                        printf("M�s: %s \n",t.Nascimento.mes);
+		                                        printf("Insira o seu ano de nascimento: ");
+		                                        scanf("%i%*c",&t.Nascimento.ano);
+		                                        system("cls");
+		                                        if(t.Nascimento.ano >=1900 && t.Nascimento.ano <=2024){
+		                                            t.Nascimento.ano = t.Nascimento.ano;
+												    quero ='N';
+		                                        }else{
+		                                            quero ='S';
+												    printf("N�o e possivel registar este ano\n\n");
+		                                        }
+		                                    }											
+											break;		
+									}
+				        }
+				    }
+				    
+					AtualizarClientes(t,Codigo);
+                	printf("Deseja atualizar mais dados ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 8:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Listar clientes ==========================\n\n");	
+                	ListarClientes();
+                	printf("Deseja permanecer nas listas ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 9:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Fazer backup ==========================\n\n");
+					CopiaDeSeguranca();
+                	printf("Backup feito com sucesso!\n\n");	
+                	printf("Deseja fazer mais c�pias de seguran�a ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 10:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Restaurar backup ==========================\n\n");
+
+					printf("Backup restaurado com sucesso!\n\n");
+					printf("Deseja restaurar mais c�pias de seguran�a ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			case 11:
+				while(quero=='s' || quero=='S'){
+					system("cls");
+					printf("========================== Dados particulares ==========================\n\n");
+					printf("insira o codigo do cliente :");
+					scanf("%i%*c",&Codigo);
+					for(n=0;n<=ClientesCadastrado-1;n++){
+						if(Codigo==Cliente[n].Codigo){
+							MeusDados(Cliente[n]);
+						}
+				   }
+                    printf("Deseja ver mais dados de clientes ?! [S|N]\n");
+                	scanf("%c%*c", &quero);
+				}
+				quero='s';
+				system("cls");
+				break;
+			default:
+				system("cls");
+				printf("Foi um prazer poder ajud�-lo !\n");
+				printf("Volte sempre !\n");
+				quero='n';
+				break;
+		}
+	}
+	return 0;
+
+}
